@@ -97,7 +97,17 @@ def main():
         if epoch % 10 == 0 or epoch == 1:
             print(f"RobustBio Epoch {epoch:02d}/30 | Loss: {total_loss/len(dataloader.dataset):.6f}")
 
-    # 4. Extract Soft Assignments & Compute Per-Cell Uncertainty
+    # 4. Save trained model weights and metadata
+    checkpoint = {
+        "model_state_dict": model.state_dict(),
+        "cluster_centers": model.cluster_layer.detach().cpu(),
+        "latent_dim": 32,
+        "num_clusters": num_classes,
+    }
+    torch.save(checkpoint, "robustbio_checkpoint.pt")
+    print("\n[SUCCESS] Saved trained weights to 'robustbio_checkpoint.pt'!")
+
+    # 5. Extract Soft Assignments & Compute Per-Cell Uncertainty
     model.eval()
     with torch.no_grad():
         z_final_list, q_final_list = [], []
@@ -118,7 +128,7 @@ def main():
 
     metrics_all = evaluate_clustering(z_final, ground_truth, final_preds)
 
-    # 5. Risk-Coverage Evaluation: Remove Top 15% Most Uncertain Cells
+    # 6. Risk-Coverage Evaluation: Remove Top 15% Most Uncertain Cells
     cutoff_threshold = np.percentile(cell_entropy, 85)
     certain_mask = cell_entropy <= cutoff_threshold
 
