@@ -91,7 +91,7 @@ Ground truth annotations (left), RobustBio predicted clusters (middle), and per-
 
 ### Risk–coverage curve (selective classification)
 
-![Risk-coverage curve](robustbio_risk_coverage_curve.png)
+![Risk-coverage curve](robustbio_risk_coverage_curve.jpg)
 
 ARI (blue, left axis) and Silhouette (orange, right axis) vs. cell coverage as high-entropy cells are filtered out. Both metrics rise monotonically: at 100% coverage ARI ≈ 0.58 / Silhouette ≈ 0.51; at 85% coverage ≈ 0.62 / ≈ 0.58; at 70% ≈ 0.69 / ≈ 0.68; and at 50% coverage **ARI ≈ 0.78 / Silhouette ≈ 0.87**. The steady, near-linear climb confirms that assignment entropy $H_i$ tracks misclassification risk — the cells the model is most uncertain about are exactly the ones dragging down both biological agreement and geometric separation.
 

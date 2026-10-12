@@ -127,8 +127,8 @@ def main():
     plt.title("RobustBio Risk-Coverage Curve (Selective Classification)")
     plt.grid(True, linestyle=":", alpha=0.6)
     plt.tight_layout()
-    plt.savefig("robustbio_risk_coverage_curve.png", dpi=300)
-    print("Saved Risk-Coverage curve to 'robustbio_risk_coverage_curve.png'")
+    plt.savefig("robustbio_risk_coverage_curve.jpg", dpi=300)
+    print("Saved Risk-Coverage curve to 'robustbio_risk_coverage_curve.jpg'")
 
 if __name__ == "__main__":
     main()
