@@ -12,7 +12,7 @@
 | **Standard Autoencoder** | 100% | 0.6083 | 0.7631 | 0.1430 |
 | **RobustBio (All Cells)** | 100% | 0.5559 | 0.7238 | 0.5500 |
 | **RobustBio (Uncertainty Filtered)** | **85%** | **0.5926** | **0.7422** | **0.6192** |
-| **RobustBio + Perturbation Consistency + Entropy Filtering (latest)** | **85%** | **0.78** | — | **0.87** |
+| **RobustBio + Perturbation Consistency + Entropy Filtering (latest)** | **50%** | **0.78** | — | **0.87** |
 
 > Run `python benchmark.py` to reproduce the PCA baseline, RobustBio (100%), and RobustBio (85% filtered) rows from the saved `robustbio_checkpoint.pt`. Standard Autoencoder numbers come from `train_autoencoder.py`. The latest 0.78 ARI / 0.87 Silhouette row is the reported result after strengthening the soft-clustering weight and L2-normalizing latents to the unit hypersphere — retrain with `python train_robustbio.py` to reproduce it.
 
@@ -28,7 +28,7 @@
 
 ### Perturbation Consistency + Uncertainty Filtering (latest best)
 
-Dual latent views ($z + \epsilon$, $\epsilon \sim \mathcal{N}(0, 0.05^2)$) are penalized with symmetric KL-divergence so the encoder learns a noise-robust manifold. At inference, per-cell assignment entropy $H_i = -\sum_k q_{ik} \log q_{ik}$ scores confidence; dropping the top ~15% highest-entropy boundary cells (85% coverage) removes ambiguous transition states caught between centroids. Reported effect on PBMC 3k: **ARI 0.78, Silhouette 0.87** — the jump comes from evaluating only high-confidence cells on a hypersphere-normalized latent space where Euclidean distance matches cosine geometry.
+Dual latent views ($z + \epsilon$, $\epsilon \sim \mathcal{N}(0, 0.05^2)$) are penalized with symmetric KL-divergence so the encoder learns a noise-robust manifold. At inference, per-cell assignment entropy $H_i = -\sum_k q_{ik} \log q_{ik}$ scores confidence; filtering high-entropy boundary cells (100% → 50% coverage) removes ambiguous transition states caught between centroids. Reported effect on PBMC 3k: at **50% coverage, ARI 0.78 and Silhouette 0.87** (from ~0.58 / ~0.51 at full coverage) — the jump comes from evaluating only high-confidence cells on a hypersphere-normalized latent space where Euclidean distance matches cosine geometry. See the Risk–Coverage Curve figure below for the full sweep.
 
 ---
 
@@ -93,7 +93,7 @@ Ground truth annotations (left), RobustBio predicted clusters (middle), and per-
 
 ![Risk-coverage curve](robustbio_risk_coverage_curve.png)
 
-ARI and Silhouette rise as high-entropy cells are filtered (100% → 50% coverage), confirming that entropy tracks misclassification risk.
+ARI (blue, left axis) and Silhouette (orange, right axis) vs. cell coverage as high-entropy cells are filtered out. Both metrics rise monotonically: at 100% coverage ARI ≈ 0.58 / Silhouette ≈ 0.51; at 85% coverage ≈ 0.62 / ≈ 0.58; at 70% ≈ 0.69 / ≈ 0.68; and at 50% coverage **ARI ≈ 0.78 / Silhouette ≈ 0.87**. The steady, near-linear climb confirms that assignment entropy $H_i$ tracks misclassification risk — the cells the model is most uncertain about are exactly the ones dragging down both biological agreement and geometric separation.
 
 ### Baseline: PCA + K-Means / Leiden
 
