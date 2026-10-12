@@ -93,8 +93,11 @@ class SingleCellClusteringAE(nn.Module):
         """
         Student's t-distribution kernel for soft clustering.
         q_ik = (1 + ||z_i - mu_k||^2 / alpha)^(-(alpha+1)/2)
+        L2-normalized to unit hypersphere for tighter geometric separation.
         """
-        dist = torch.sum((z.unsqueeze(1) - self.cluster_layer) ** 2, dim=2)
+        z = F.normalize(z, p=2, dim=1)
+        mu = F.normalize(self.cluster_layer, p=2, dim=1)
+        dist = torch.sum((z.unsqueeze(1) - mu) ** 2, dim=2)
         q = 1.0 / (1.0 + dist / self.alpha)
         q = q ** ((self.alpha + 1.0) / 2.0)
         q = (q.t() / torch.sum(q, dim=1)).t()
@@ -150,7 +153,10 @@ class RobustBioAE(nn.Module):
         return self.encoder(x)
 
     def get_soft_assignments(self, z):
-        dist = torch.sum((z.unsqueeze(1) - self.cluster_layer) ** 2, dim=2)
+        # L2-normalize to unit hypersphere so Euclidean distance = cosine geometry.
+        z = F.normalize(z, p=2, dim=1)
+        mu = F.normalize(self.cluster_layer, p=2, dim=1)
+        dist = torch.sum((z.unsqueeze(1) - mu) ** 2, dim=2)
         q = 1.0 / (1.0 + dist / self.alpha)
         q = q ** ((self.alpha + 1.0) / 2.0)
         q = (q.t() / torch.sum(q, dim=1)).t()

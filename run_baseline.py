@@ -32,7 +32,7 @@ def main():
     print("\n[3/4] Running Graph Leiden...")
     sc.pp.neighbors(adata, n_neighbors=15, n_pcs=32)
     try:
-        sc.tl.leiden(adata, resolution=0.5, key_added="leiden_pred")
+        sc.tl.leiden(adata, resolution=0.5, key_added="leiden_pred", flavor="igraph")
     except Exception as e:
         print(f"Leiden failed ({e}); falling back to K-Means labels for baseline 2.")
         adata.obs["leiden_pred"] = kmeans_labels.astype(str)
@@ -81,22 +81,18 @@ def main():
     plt.tight_layout()
     plt.savefig("pbmc3k_baseline_clustering.png", dpi=300)
     print("\nVisualization saved to 'pbmc3k_baseline_clustering.png'!")
-    plt.show()
+    plt.close()
 
     # 7. Visualize key biological marker genes on the UMAP (biological proof)
-    # CD3D = T-cells, MS4A1 = B-cells, LYZ = Monocytes
-    marker_genes = ["CD3D", "MS4A1", "LYZ"]
-    available = [g for g in marker_genes if g in adata.var_names]
-    missing = [g for g in marker_genes if g not in adata.var_names]
-    if missing:
-        print(f"\nNote: marker gene(s) {missing} not in 2000-HVG subset, skipping those.")
-    if available:
-        print(f"Plotting marker genes {available} on UMAP...")
-        sc.pl.umap(adata, color=available, spot_size=10, show=False)
-        plt.tight_layout()
-        plt.savefig("pbmc3k_marker_genes.png", dpi=300)
+    # MS4A1 = B-cells, LYZ = Monocytes, GNLY = NK cells, PPBP = Megakaryocytes
+    available_markers = [g for g in ["MS4A1", "LYZ", "GNLY", "PPBP"] if g in adata.var_names]
+
+    if available_markers:
+        print(f"Plotting marker genes {available_markers} on UMAP...")
+        sc.pl.umap(adata, color=available_markers, show=False)
+        plt.savefig("pbmc3k_marker_genes.png", bbox_inches="tight", dpi=300)
         print("Visualization saved to 'pbmc3k_marker_genes.png'!")
-        plt.show()
+        plt.close()
     else:
         print("No marker genes available in adata.var_names; skipping marker-gene UMAP.")
 

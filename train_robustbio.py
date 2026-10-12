@@ -88,7 +88,7 @@ def main():
             loss_balance = torch.sum(q_bar * torch.log(q_bar + 1e-8))
 
             # Total Loss
-            loss = loss_recon + 0.1 * loss_clust + 0.05 * loss_consistency + 0.01 * loss_balance
+            loss = loss_recon + 0.5 * loss_clust + 0.05 * loss_consistency + 0.01 * loss_balance
 
             loss.backward()
             optimizer.step()
